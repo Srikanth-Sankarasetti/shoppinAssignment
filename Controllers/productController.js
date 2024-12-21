@@ -1,7 +1,8 @@
 const Ecommerce = require("../Models/commerce");
 const crawlDomain = require("../Controllers/crawlWebsite");
+const catchAsyncError = require("../utils/catchAsyncerror");
 
-exports.crawlrequest = async (req, res) => {
+exports.crawlrequest = catchAsyncError(async (req, res) => {
   const { domains } = req.body;
   console.log(domains);
   let productLinks;
@@ -14,9 +15,9 @@ exports.crawlrequest = async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "An error occurred during crawling." });
   }
-};
+});
 
-exports.getAllProduct = async (req, res) => {
+exports.getAllProduct = catchAsyncError(async (req, res) => {
   try {
     const productList = await Ecommerce.find();
     res
@@ -25,4 +26,4 @@ exports.getAllProduct = async (req, res) => {
   } catch (err) {
     res.status(500).send({ Status: "Fail", message: err.message });
   }
-};
+});

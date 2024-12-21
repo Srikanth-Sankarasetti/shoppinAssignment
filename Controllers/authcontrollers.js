@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../Models/userModel");
+const catchAsyncError = require("../utils/catchAsyncerror");
 
 //signup function to create user
-exports.signup = async (req, res, next) => {
+exports.signup = catchAsyncError(async (req, res, next) => {
   const userCreate = await User.create(req.body);
 
   const token = jwt.sign({ id: userCreate._id }, "srikanth");
@@ -13,10 +14,10 @@ exports.signup = async (req, res, next) => {
     userCreate,
     token,
   });
-};
+});
 
 //login authentication
-exports.login = async (req, res, next) => {
+exports.login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
   console.log(req.body);
   const userDetails = await User.findOne({ email });
@@ -36,4 +37,4 @@ exports.login = async (req, res, next) => {
       res.status(401).send({ status: "Fail", message: "invalid password" });
     }
   }
-};
+});

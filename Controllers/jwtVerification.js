@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 //verfiy the user to get the al the request
-const jwtveryficationMiddleware = async (req, res, next) => {
+const jwtveryficationMiddleware = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   let jwtToken;
   if (authHeader !== undefined) {

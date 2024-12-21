@@ -3,7 +3,7 @@ const app = express();
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const productRouter = require("./Routes/ProductRoutes");
-
+const globalErrorHandle = require("./Controllers/globalErrorhandle");
 app.use(express.json());
 
 const limiter = rateLimit({
@@ -19,5 +19,12 @@ if (process.env.NODE_ENV === "devolopment") {
 app.use("/", limiter);
 
 app.use("/", productRouter);
+
+app.all("*", (req, res, next) => {
+  const err = new Error(`somthing worng with ${req.originalUrl}`);
+  next(err);
+});
+
+app.use(globalErrorHandle);
 
 module.exports = app;

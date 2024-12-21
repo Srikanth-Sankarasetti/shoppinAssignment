@@ -2,12 +2,13 @@ const puppeteer = require("puppeteer"); //dynamic page fetching and web automati
 const Bottleneck = require("bottleneck"); //Controls the frequency of function calls and avoid overwhelming servers
 const Ecommerce = require("../Models/commerce");
 const isProductUrl = require("../utils/productpattrencheck");
+const catchAsyncError = require("../utils/catchAsyncerror");
 
 // Rate limiter to avoid overwhelming servers
 const limiter = new Bottleneck({ minTime: 200 }); // 200ms between requests, 5 request in one mint
 
 // Function to fetch dynamic pages using Puppeteer
-const fetchDynamicPage = async (pageUrl) => {
+const fetchDynamicPage = catchAsyncError(async (pageUrl) => {
   return await limiter.schedule(async () => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -23,9 +24,9 @@ const fetchDynamicPage = async (pageUrl) => {
       return null;
     }
   });
-};
+});
 
-const crawlDomain = async (domain, maxDepth = 3) => {
+const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
   const visited = new Set();
   const toVisit = [domain];
 
@@ -81,6 +82,6 @@ const crawlDomain = async (domain, maxDepth = 3) => {
     toVisit.length = 0;
     toVisit.push(...nextLevel);
   }
-};
+});
 
 module.exports = crawlDomain;
