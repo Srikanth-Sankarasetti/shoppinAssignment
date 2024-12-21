@@ -1,3 +1,4 @@
+const fs = require("fs");
 const puppeteer = require("puppeteer"); //dynamic page fetching and web automation
 const Bottleneck = require("bottleneck"); //Controls the frequency of function calls and avoid overwhelming servers
 const Ecommerce = require("../Models/commerce");
@@ -26,9 +27,11 @@ const fetchDynamicPage = catchAsyncError(async (pageUrl) => {
   });
 });
 
-const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
+const crawlDomain = async (domain, maxDepth = 3) => {
   const visited = new Set();
   const toVisit = [domain];
+  const productUrls = {};
+  const browser = await puppeteer.launch();
 
   for (let depth = 0; depth < maxDepth; depth++) {
     const nextLevel = [];
@@ -44,7 +47,7 @@ const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
       if (!html) return;
 
       //extracting all the links using puppeteer
-      const browser = await puppeteer.launch();
+
       const page = await browser.newPage();
       try {
         await page.setContent(html);
@@ -54,6 +57,12 @@ const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
         for (const link of links) {
           if (isProductUrl(link)) {
             //checking availble domain and url
+            if (!productUrls[domain]) {
+              productUrls[domain] = [];
+            }
+            if (!productUrls[domain].includes(link)) {
+              productUrls[domain].push(link);
+            }
             const existingEntry = await Ecommerce.findOne({ domain });
             console.log(existingEntry);
             if (existingEntry) {
@@ -72,7 +81,7 @@ const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
       } catch (err) {
         console.error(`Error processing links for ${currentUrl}:`, err.message);
       } finally {
-        await browser.close();
+        await page.close();
       }
     });
 
@@ -82,6 +91,11 @@ const crawlDomain = catchAsyncError(async (domain, maxDepth = 3) => {
     toVisit.length = 0;
     toVisit.push(...nextLevel);
   }
-});
+  // After crawling is done, write the results to a JSON file
+  fs.writeFileSync("product_urls.json", JSON.stringify(productUrls, null, 2));
+  console.log("Product URLs saved to product_urls.json");
+
+  await browser.close();
+};
 
 module.exports = crawlDomain;

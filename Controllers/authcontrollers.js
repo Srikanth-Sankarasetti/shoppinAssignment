@@ -5,6 +5,12 @@ const catchAsyncError = require("../utils/catchAsyncerror");
 
 //signup function to create user
 exports.signup = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  const userDetails = await User.findOne({ email });
+  if (userDetails !== undefined) {
+    const err = new Error("user already exits");
+    next(err);
+  }
   const userCreate = await User.create(req.body);
 
   const token = jwt.sign({ id: userCreate._id }, "srikanth");
