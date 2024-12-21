@@ -3,13 +3,12 @@ const puppeteer = require("puppeteer"); //dynamic page fetching and web automati
 const Bottleneck = require("bottleneck"); //Controls the frequency of function calls and avoid overwhelming servers
 const Ecommerce = require("../Models/commerce");
 const isProductUrl = require("../utils/productpattrencheck");
-const catchAsyncError = require("../utils/catchAsyncerror");
 
 // Rate limiter to avoid overwhelming servers
 const limiter = new Bottleneck({ minTime: 200 }); // 200ms between requests, 5 request in one mint
 
 // Function to fetch dynamic pages using Puppeteer
-const fetchDynamicPage = catchAsyncError(async (pageUrl) => {
+const fetchDynamicPage = async (pageUrl) => {
   return await limiter.schedule(async () => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -25,14 +24,11 @@ const fetchDynamicPage = catchAsyncError(async (pageUrl) => {
       return null;
     }
   });
-});
+};
 
 const crawlDomain = async (domain, maxDepth = 3) => {
   const visited = new Set();
   const toVisit = [domain];
-  const productUrls = {};
-  const browser = await puppeteer.launch();
-
   for (let depth = 0; depth < maxDepth; depth++) {
     const nextLevel = [];
 
@@ -47,7 +43,7 @@ const crawlDomain = async (domain, maxDepth = 3) => {
       if (!html) return;
 
       //extracting all the links using puppeteer
-
+      const browser = await puppeteer.launch();
       const page = await browser.newPage();
       try {
         await page.setContent(html);
@@ -57,12 +53,6 @@ const crawlDomain = async (domain, maxDepth = 3) => {
         for (const link of links) {
           if (isProductUrl(link)) {
             //checking availble domain and url
-            if (!productUrls[domain]) {
-              productUrls[domain] = [];
-            }
-            if (!productUrls[domain].includes(link)) {
-              productUrls[domain].push(link);
-            }
             const existingEntry = await Ecommerce.findOne({ domain });
             console.log(existingEntry);
             if (existingEntry) {
@@ -81,7 +71,7 @@ const crawlDomain = async (domain, maxDepth = 3) => {
       } catch (err) {
         console.error(`Error processing links for ${currentUrl}:`, err.message);
       } finally {
-        await page.close();
+        await browser.close();
       }
     });
 
@@ -91,11 +81,6 @@ const crawlDomain = async (domain, maxDepth = 3) => {
     toVisit.length = 0;
     toVisit.push(...nextLevel);
   }
-  // After crawling is done, write the results to a JSON file
-  fs.writeFileSync("product_urls.json", JSON.stringify(productUrls, null, 2));
-  console.log("Product URLs saved to product_urls.json");
-
-  await browser.close();
 };
 
 module.exports = crawlDomain;
