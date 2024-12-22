@@ -86,7 +86,7 @@ This project is a web crawler built with Node.js, Express.js, Puppeteer for web 
 
 # response
 
-        { Status: "Success", message: "Crawling completed." }
+    { Status: "Success", message: "Crawling completed." }
 
 # GET /products
 
