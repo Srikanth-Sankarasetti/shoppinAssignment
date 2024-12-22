@@ -7,7 +7,7 @@ const path = require("path");
 
 exports.crawlrequest = async (req, res) => {
   const { domains } = req.body;
-  console.log(domains);
+
   try {
     for (const domain of domains) {
       console.log("Starting crawl for domain:", domain);

@@ -5,12 +5,11 @@ const app = require("./app");
 
 port = process.env.PORT || 5000;
 const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.PASSWORD);
-console.log(DB);
 
 mongoose
   .connect(DB)
   .then(() => {
-    console.log("connection succeful");
+    console.log("connection successfull");
   })
   .catch((err) => {
     console.log(err.message);

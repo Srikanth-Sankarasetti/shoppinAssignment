@@ -32,7 +32,6 @@ const fetchDynamicPage = async (pageUrl) => {
       await browser.close();
       return content;
     } catch (err) {
-      console.error(`Error fetching dynamic page ${pageUrl}:`, err.message);
       await browser.close();
       return null;
     }
