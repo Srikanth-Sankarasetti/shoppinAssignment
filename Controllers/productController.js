@@ -14,9 +14,7 @@ exports.crawlrequest = async (req, res) => {
       await crawlDomain(domain);
       console.log("Crawling completed for domain:", domain);
     }
-    res
-      .status(200)
-      .send({ message: "Crawling completed.", data: allProductUrls });
+    res.status(200).send({ Status: "Success", message: "Crawling completed." });
   } catch (err) {
     res.status(400).send({ status: "Fail", message: err.message });
   }

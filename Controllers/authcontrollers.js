@@ -7,9 +7,9 @@ const catchAsyncError = require("../utils/catchAsyncerror");
 exports.signup = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
   const userDetails = await User.findOne({ email });
-  if (userDetails !== undefined) {
+  if (userDetails) {
     const err = new Error("user already exits");
-    next(err);
+    return next(err);
   }
   const userCreate = await User.create(req.body);
 
