@@ -56,6 +56,8 @@ exports.downloadUrls = catchAsyncError(async (req, res, next) => {
       createdAt: item.createdAt.toISOString(),
     });
   });
+
+  const filePath = path.join(__dirname, "MyCollectionData.xlsx");
   const fileName = "MyCollectionData.xlsx";
   res.setHeader(
     "Content-Type",
@@ -64,5 +66,6 @@ exports.downloadUrls = catchAsyncError(async (req, res, next) => {
   res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
 
   await workbook.xlsx.write(res);
+  await workbook.xlsx.writeFile(filePath);
   res.status(200).end();
 });
